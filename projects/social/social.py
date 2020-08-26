@@ -1,3 +1,5 @@
+import random
+
 class User:
     def __init__(self, name):
         self.name = name
@@ -45,6 +47,22 @@ class SocialGraph:
         # !!!! IMPLEMENT ME
 
         # Add users
+        for i in range(0, num_users):
+            self.add_user(f'User {i}')
+
+        # generate possible friendship combinaitions
+        # avoid duplicate friendships
+        friendship_combinations = []
+        for user_id in self.users:
+            for friend_id in range(user_id + 1, self.last_id + 1):
+                friendship_combinations.append((user_id, friend_id))
+
+        # shuffle friendships
+        random.shuffle(friendship_combinations)
+        num_friendships = num_users * avg_friendships // 2
+        for i in range(0, num_friendships):
+            friendship = friendship_combinations[i]
+            self.add_friendship(friendship[0], friendship[1])
 
         # Create friendships
 
@@ -59,7 +77,33 @@ class SocialGraph:
         """
         visited = {}  # Note that this is a dictionary, not a set
         # !!!! IMPLEMENT ME
+        
+        q = Queue()
+        q.enqueue([user_id])
+        while q.size() > 0:
+            path = q.dequeue()
+            vertex = path[-1]
+            if vertex not in visited:
+                visited[vertex] = path
+                for friend in self.friendships[vertex]:
+                    shortest_path = path.copy()
+                    shortest_path.append(friend)
+                    q.enqueue(shortest_path)
         return visited
+
+
+class Queue():
+    def __init__(self):
+        self.queue = []
+    def enqueue(self, value):
+        self.queue.append(value)
+    def dequeue(self):
+        if self.size() > 0:
+            return self.queue.pop(0)
+        else:
+            return None
+    def size(self):
+        return len(self.queue)
 
 
 if __name__ == '__main__':
